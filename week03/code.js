@@ -28,16 +28,16 @@ function convertNumberToString(num, x = 10) {
 convertNumberToString(189.11, 2);
 function convertStringToNumber(string, x = 10) {
   let charArr = string.split("");
-  let number = 0;
+  let integer = 0;
   let i = 0;
   while (i < charArr.length && charArr[i] !== ".") {
-    number = number * x;
+    integer = integer * x;
     console.log(charArr[i].codePointAt(0));
-    number += charArr[i].codePointAt(0) - "0".codePointAt(0);
+    integer += charArr[i].codePointAt(0) - "0".codePointAt(0);
     i++;
   }
-  console.log(number);
-  return number;
+  console.log(integer);
+  return integer;
 }
 convertStringToNumber("13");
 
