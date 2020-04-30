@@ -32,11 +32,9 @@ function convertStringToNumber(string, x = 10) {
   let i = 0;
   while (i < charArr.length && charArr[i] !== ".") {
     integer = integer * x;
-    console.log(charArr[i].codePointAt(0));
     integer += charArr[i].codePointAt(0) - "0".codePointAt(0);
     i++;
   }
-  console.log(integer);
   return integer;
 }
 convertStringToNumber("13");
