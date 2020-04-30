@@ -26,7 +26,7 @@ function convertNumberToString(num, x = 10) {
   return str
 }
 convertNumberToString(189.11, 2);
-function convertStringToNumber(string, x = 0) {
+function convertStringToNumber(string, x = 10) {
   let charArr = string.split("");
   let number = 0;
   let i = 0;
