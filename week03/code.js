@@ -26,7 +26,18 @@ function convertNumberToString(num, x = 10) {
   return str
 }
 convertNumberToString(189.11, 2);
-function convertStringToNumber() {
-  let charArr = string.split('')
-  let number =
+function convertStringToNumber(string, x = 0) {
+  let charArr = string.split("");
+  let number = 0;
+  let i = 0;
+  while (i < charArr.length && charArr[i] !== ".") {
+    number = number * x;
+    console.log(charArr[i].codePointAt(0));
+    number += charArr[i].codePointAt(0) - "0".codePointAt(0);
+    i++;
+  }
+  console.log(number);
+  return number;
 }
+convertStringToNumber("13");
+
