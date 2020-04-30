@@ -54,5 +54,5 @@ ConvertNumber.prototype._integerTo16 = function(integer) {
     return integer;
   }
 }
-let str2 = new ConvertNumber(0.1).toString(2)
+let str = new ConvertNumber(0.1).toString(3)
 console.log(str);
