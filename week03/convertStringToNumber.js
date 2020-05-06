@@ -10,33 +10,13 @@ function ConvertString(string) {
       return this._integerStringToNumber(charArr.splice(2), 2);
     } else if (/^0o/.test(this.value)) {
       // 八进制
-      return this._integerStringToNumber(charArr.splice(2), 2);
+      return this._integerStringToNumber(charArr.splice(2), 8);
     } else if (/^0x/.test(this.value)) {
       // 16进制
+      return this._integerStringToNumber(charArr.splice(2), 16);
     } else if (this.value.includes("-")) {
       // 十进制
     }
-
-    // let charArr = this.value.split("");
-    // let isAbs = false 
-    // if(charArr[0] === '-') {
-    //   charArr.shift()
-    //   isAbs = true
-    // }
-    // let integerString = ''
-    // let fractionString = ''
-    // if(charArr.includes('.')) {
-    //   integerString = charArr.slice(
-    //     0,
-    //     charArr.findIndex((item) => item === ".")
-    //   );
-    //   fractionString.slice(charArr.findIndex(item => item === '.')+1)
-    // } else {
-    //   integerString = charArr
-    // }
-    // let integer = this._integerStringToNumber(integerString, x);
-    
-    // return isAbs ? -integer : integer;
   }
   return String(string)
 }
@@ -44,12 +24,20 @@ ConvertString.prototype._integerStringToNumber = function (integerStringArr, x) 
   let integer = 0;
   let i = 0;
   while (i < integerStringArr.length) {
+    if (integerStringArr[i] > x && x < 10) return NaN
     integer = integer * x;
-    integer += integerStringArr[i].codePointAt(0) - "0".codePointAt(0);
+    if(x > 10) {
+      integer += to16Number(integerStringArr[i]);
+    } else {
+      integer += integerStringArr[i].codePointAt(0) - "0".codePointAt(0);
+    }
     i++;
   }
   return integer
 };
-let str = new ConvertString("0b1010").toNumber(2);
+ConvertString.prototype.to16Number = function(str){
+  if(integerStringArr[i].codePointAt(0) >= 'a'.codePointAt(0))
+}
+let str = new ConvertString("0o779").toNumber(8);
 console.log(str)
 
