@@ -58,6 +58,10 @@ ${this.bodyText}`;
       }
       connection.on("data", (data) => {
         parse.receive(data.toString());
+        debugger;
+        if (parse.isFinished) {
+          resolve(parse.response);
+        }
         connection.end();
       });
       connection.on("error", (data) => {
@@ -90,13 +94,25 @@ class ResponseParse {
     this.headers = {};
     this.headerName = "";
     this.headerValue = "";
-    this.bodyParse = null
+    this.bodyParse = null;
   }
 
   receive(string) {
     for (let i = 0; i < string.length; i++) {
       this.receiveChar(string.charAt(i));
     }
+  }
+  get isFinished() {
+    return this.bodyParse && this.bodyParse.isFinished;
+  }
+  get response() {
+    this.statusLine.match(/HTTP\/1.1 ([0-9]+) ([\s\S]+)/);
+    return {
+      statusCode: RegExp.$1,
+      statusText: RegExp.$2,
+      headers: this.headers,
+      body: this.bodyParse.content.join(""),
+    };
   }
   receiveChar(char) {
     if (this.current === this.WAITTING_STATUS_LINE) {
@@ -119,7 +135,6 @@ class ResponseParse {
       } else if (char === "\r") {
         // 获取/r 就获取body
         this.current = this.WAITTING_HEADER_BLOCK_END;
-        console.log(this.current, 'dddkk')
         if (this.headers["Transfer-Encoding"] === "chunked") {
           this.bodyParse = new TrunkedBodyParse();
         }
@@ -147,12 +162,11 @@ class ResponseParse {
         this.current = this.WAITTING_HEADER_NAME;
       }
     } else if (this.current === this.WAITTING_HEADER_BLOCK_END) {
-      if(char === "\n") {
+      if (char === "\n") {
         this.current = this.WAITTING_BODY;
       }
     } else if (this.current === this.WAITTING_BODY) {
       this.bodyParse.receiveChar(char);
-      console.log(this.bodyParse.content);
     }
   }
 }
@@ -161,46 +175,50 @@ class TrunkedBodyParse {
     this.WAITTING_LENGTH = 0;
     this.WAITTING_LENGTH_LINE_END = 1;
     this.READING_TRUNK = 2;
-    this.WAITTING_NEW_LINE === 3;
-    this.WAITTING_NEW_LINE_END === 4; 
+    this.WAITTING_NEW_LINE = 3;
+    this.WAITTING_NEW_LINE_END = 4;
     this.length = 0;
-    this.content =[] 
+    this.content = [];
     this.isFinished = false;
     this.current = this.WAITTING_LENGTH;
   }
   receiveChar(char) {
     // 数组做加法运算比较差
-    console.log(JSON.stringify(char));
-    if(this.current === this.WAITTING_LENGTH) {
-      if(char === '\r') {
-        if(this.length === 0) {
-          this.isFinished = true
+    if (this.current === this.WAITTING_LENGTH) {
+      // console.log("khbjhxs00000jh", this.length);
+      if (char === "\r") {
+        //console.log('khbjhjh', this.length);
+        if (this.length === 0) {
+          this.isFinished = true;
         }
-        this.current = this.WAITTING_LENGTH_LINE_END
+        this.current = this.WAITTING_LENGTH_LINE_END;
       } else {
-        this.length *= 10
-        this.length += char.charCodeAt(0) - '0'.charCodeAt(0);
+        this.length *= 10;
+        this.length += char.charCodeAt(0) - "0".charCodeAt(0);
       }
-    } else if(this.current === this.WAITTING_LENGTH_LINE_END) {
-      if(char === '\n') {
+    } else if (this.current === this.WAITTING_LENGTH_LINE_END) {
+      if (char === "\n") {
         this.current = this.READING_TRUNK;
       }
-    }else if(this.current === this.READING_TRUNK) {
-      if(char === '\n') {
+    } else if (this.current === this.READING_TRUNK) {
+      if (!this.isFinished) {
         this.content.push(char);
-        this.length--;
-        if(this.length === 0) {
-          this.current = this.WAITTING_NEW_LINE
-        }
       }
-    } else if(this.current === this.WAITTING_NEW_LINE) {
-      if(char === '\n') {
-        this.current = this.READING_TRUNK;
+      this.length--;
+      if (this.length === 0) {
+        this.current = this.WAITTING_NEW_LINE;
+      }
+    } else if (this.current === this.WAITTING_NEW_LINE) {
+      if (char === "\r") {
+        this.current = this.WAITTING_NEW_LINE_END;
+      }
+    } else if (this.current === this.WAITTING_NEW_LINE_END) {
+      if (char === "\n") {
+        this.current = this.WAITTING_LENGTH;
       }
     }
   }
 }
-
 
 void (async function () {
   const options = {
