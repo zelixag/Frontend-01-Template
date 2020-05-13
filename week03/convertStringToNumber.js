@@ -36,7 +36,9 @@ ConvertString.prototype._integerStringToNumber = function (integerStringArr, x) 
   return integer
 };
 ConvertString.prototype.to16Number = function(str){
-  if(integerStringArr[i].codePointAt(0) >= 'a'.codePointAt(0))
+  if(integerStringArr[i].codePointAt(0) >= 'a'.codePointAt(0)) {
+    
+  }
 }
 let str = new ConvertString("0o779").toNumber(8);
 console.log(str)
