@@ -1,0 +1,100 @@
+<style>
+  .cell {
+    display:inline-block;
+    width:6px;
+    height:6px;
+    background-color: gray;
+    border-bottom:solid 1px white;
+    border-right:solid 1px white;
+    vertical-align: middle;
+  }
+  #container{
+      width:701px;
+  }
+</style>
+<div id="container"></div>
+<script>
+  function cloneDeep(obj) {
+    return JSON.parse(JSON.stringify(obj))
+  }
+  function throttle(fn, gapTime) {
+    return function (map) {
+      setTimeout(()=> {
+        fn(map);
+      }, gapTime)
+    }
+  }
+  function drawColor() {
+    console.log('boom')
+    for (let y = 0; y < 100; y++) {
+      for (let x = 0; x < 100; x++) {
+        let cell = document.querySelector(`.cell-x${x}-y${y}`)
+        if (map[100 * y + x] == 1)
+          cell.style.backgroundColor = 'black'
+      }
+    }
+  }
+  function drawPath(prev, current) {
+    let fillPoints = []
+    
+    while(current.x !== prev.x && current.y !== prev.y ) {
+      const changeX = Math.abs(current.x - prev.x)
+      const changeY = Math.abs(current.y - prev.y)
+      if (changeX >= changeY) {
+        prev.x += current.x >= prev.x ? 1 : -1
+      }
+      if (changeX <= changeY) {
+        prev.y += current.y >= prev.y ? 1 : -1
+      }
+      fillPoints.push(cloneDeep(prev))
+    }
+    fillPoints.pop()
+    return fillPoints
+  }
+  let map = new Array(10000).fill(0);
+  let container = document.getElementById("container")
+  let prev = {}
+  let buffer = []
+  for (let y = 0; y < 100; y++) {
+    for (let x = 0; x < 100; x++) {
+      let cell = document.createElement("div")
+      cell.classList.add(`cell`)
+      cell.classList.add(`cell-x${x}-y${y}`)
+      
+      if(map[100*y + x] == 1)
+        cell.style.backgroundColor = 'black'
+
+      cell.addEventListener('mousemove', (e) => {
+        if(mousedown) {
+          if(clear) {
+            cell.style.backgroundColor = ""
+            map[100*y + x] = 0
+          } else {
+            cell.style.backgroundColor = 'black';
+            if(prev.x !== x || prev.y !== y) {
+              prev = { x, y }
+              buffer.push(prev)
+            }
+            map[100 * y + x] = 1
+            if(buffer.length >= 2) {
+              let fillPoints = drawPath(buffer[buffer.length-2], (buffer[buffer.length - 1]));
+              fillPoints.forEach(item => {
+                map[100 * item.y + item.x] = 1
+              })
+              throttle(drawColor, 1000)(map)
+            }
+          }
+        }
+      })
+      container.appendChild(cell)
+    }
+  }
+  let mousedown = false
+  let clear = false
+  document.addEventListener('mousedown', (e) => {
+    mousedown = true
+    clear = (e.which === 3)
+  })
+  document.addEventListener('mouseup', () => mousedown = false)
+  document.addEventListener('contextmenu', e => e.preventDefault())
+</script>
