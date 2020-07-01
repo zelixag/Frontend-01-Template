@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    #KMP {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .pattern {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    .string {
+      display: flex;
+      flex-wrap: wrap;
+    }
+
+    .item{
+      width: 100px;
+      height: 100px;
+      display: flex;
+      font-size: 32px;
+      color: #2e3;
+      align-items: center;
+      justify-content: center;
+      
+      border-radius: 50px;
+      margin: 20px;
+      background: #eda;
+    }
+    
+    .active-string{
+      background: pink;
+      transition: background 1s;
+    }
+    .active{
+      background: #a73;
+      transition: background 2s;
+    }
+  </style>
+</head>
+<body>
+  <div id="KMP">
+    <div>pattern</div>
+    <div class="pattern"></div>
+    <div>string</div>
+    <div class="string"></div>
+  </div>
+  <script src="./kmpMatch.js"></script>
+  <script>
+    void function() {
+      console.log('search', search("abababx", "iamababababxdksdjks"))
+      console.log(
+        'match("abababx", "iamababababxdksdjks")',
+        match(view("abababx", 'pattern'),  view("iamababababxdksdjks", 'string'))
+      );
+    }()
+  </script>
+</body>
+</html>

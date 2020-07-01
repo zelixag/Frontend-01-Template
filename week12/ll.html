@@ -1,0 +1,125 @@
+<script>  
+  // 使用正则对字符串进行词法分析 Number ([0-9\.]+) Whitespace []+ lineTerminator [\r\n]+ + - * / 
+  var regexp = /([0-9\.]+)|([ ])|([\r\n]+)|(\+)|(\-)|(\*)|(\/)/g
+  // 因为使用了圆括号 分成一个个字表达是 匹配的都会到相应的索引内
+  var dictionary = ["Number", "Whitespace", "LineTerminator", "+", "-", "*", "/"]
+  // 1. 使用正则对四则运算字符串进行词法解析
+  // 2. 将解析的每个词给与类型（type） 和值（value）
+  function* tokenize(source) {
+    var result = null
+    var lastIndex = 0
+
+    do {
+      lastIndex = regexp.lastIndex;
+      result = regexp.exec(source);
+      if(!result) break;
+
+      if(regexp.lastIndex - lastIndex > result[0].length)
+        throw new Error(`Unexpected token " ${source.slice(lastIndex, regexp.lastIndex - lastIndex - result[0].length)}"!`)
+      let token = {
+        type: null,
+        value: null
+      }
+
+      for(var i = 0; i < dictionary.length; i++ ) {
+        if(result[i + 1])
+          token.type = dictionary[i]
+      }
+      token.value = (result[0])
+
+      yield token;
+    }while(result);
+
+    yield {type: 'EOF'};
+  }
+  function Expression(source) {
+
+  }
+  // 加法的产生式有三种情况  包括乘法（这个不是结束符） 加法一种 减法一种
+  function AdditiveExpression(source) {
+    // 最开始是Number时 创建第一个产生式 Number
+    if (source[0].type === "Number") {
+      MultiplicativeExpression(source)
+      return AdditiveExpression(source)
+    }
+    // 这里是一个转折点 type 为乘法时 转接type为add 加法
+    if(source[0].type === 'MultiplicativeExpression') {
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source.shift()]
+      }
+      source.unshift(node)
+      return AdditiveExpression(source)
+    }
+    // 转到AdditiveExpression 计算第一中加法产生式 + 只shift第一个 第二个 第三个是乘法产生式
+    if (source[0].type === 'AdditiveExpression' && source.length > 1 && source[1].type === '+') {
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source.shift(), source.shift()]
+      }
+      // 第三个和乘法不一样，第三个不是终结符需要展开乘法产生式
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+    // 转到AdditiveExpression 计算第一中加法产生式 + 只shift第一个 第二个 第三个是乘法产生式
+    if (source[0].type === 'AdditiveExpression' && source.length > 1 && source[1].type === '-') {
+      // 加法产生式 前两个直接取值
+      let node = {
+        type: 'AdditiveExpression',
+        children: [source.shift(), source.shift()]
+      }
+      // 第三个和乘法不一样，第三个不是终结符需要展开乘法产生式
+      MultiplicativeExpression(source);
+      node.children.push(source.shift());
+      source.unshift(node);
+      return AdditiveExpression(source);
+    }
+    // 以上将词法都经过语法分析后，数组第一个就是最后的产生式
+    if (source[0].type === "AdditiveExpression")
+      return source[0]
+  }
+  // 处理完了一个乘法的情况 需要处理连乘，就需要递归
+  function MultiplicativeExpression(source) {
+    // 最开始是Number时 创建第一个产生式 Number
+    if(source[0].type === "Number") {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: source.shift()
+      }
+      source.unshift(node);
+      return MultiplicativeExpression(source)
+    }
+
+    // 第二种情况，产生第二个产生式  MultiplicativeExpression * Number
+    if(source[0].type === "MultiplicativeExpression" && source.length > 1 && source[1].type === '*') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: [source.shift(), source.shift(), source.shift()]
+      }
+      source.unshift(node);
+      return MultiplicativeExpression(source)
+    }
+
+    // 第三种情况，产生第三个产生式  MultiplicativeExpression / Number
+    if (source[0].type === "MultiplicativeExpression" && source.length > 1 && source[1].type === '/') {
+      let node = {
+        type: 'MultiplicativeExpression',
+        children: [source.shift(), source.shift(), source.shift()]
+      }
+      source.unshift(node);
+      return MultiplicativeExpression(source)
+    }
+    // 以上将词法都经过语法分析后，数组第一个就是最后的产生式
+    if(source[0].type === "MultiplicativeExpression")
+      return source[0]
+  }
+  let source = []
+  for(let token of tokenize('43 + 1024 * 3')) {
+    if(token.type !== 'Whitespace' && token.type !== "LineTerminator")
+      source.push(token)
+  }
+  console.log(AdditiveExpression(source))
+  document.write(JSON.stringify(AdditiveExpression(source)))
+</script>
