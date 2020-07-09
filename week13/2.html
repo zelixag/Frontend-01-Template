@@ -1,0 +1,142 @@
+<div style="display: flex;flex-direction: column;width: 255px"> 
+  <input type="range" id="r" min="0" max="255">
+  <input type="range" id="g" min="0" max="255">
+  <input type="range" id="b" min="0" max="255">
+</div>
+
+<div id="color" style="width: 200px;height:200px;border: 1px solid red"></div>
+<script>
+  // 简单的思路，就是声明一个全局数组，每次effect的时候，将handler都push到这个数组里面
+  // 在set的时候就遍历这个数组执行handler
+
+  // 怎么做到handler收集呢
+  let usedReactivities = []
+  let handlers = new Map()
+  // 需要有一个
+  let reactivities = new Map()
+
+  function reactive(obj) {
+    // 如果发现已经收集的了这个类，就直接返回
+    if( reactivities.has(obj)) {
+      return reactivities.get(obj)
+    }
+
+    let proxy =  new Proxy(obj, {
+      get(obj, prop) {
+        usedReactivities.push([obj, prop])
+        if(typeof obj[prop] === 'object')
+          return reactive(obj[prop])
+        // 如果这样返回出去的都是一个新对象
+        // 有了Reactivities的存储就不会每次返回的是新对象， 对性能也有好处
+          
+        // 在get时候做依赖收集
+        return obj[prop]
+      },
+      set(obj, prop, val) {
+        // 但是这里不能执行到handler()
+        obj[prop] = val
+        // 找到这个对象找到这个对象的属性的变化handler 执行
+        if(handlers.get(obj))
+          if(handlers.get(obj).get(prop))
+            for(let handler of handlers.get(obj).get(prop)) {
+              handler()
+            }
+        return obj[prop]
+      }
+    })
+
+    // 我，们存储了proxy 这样每次就不是都new出来的新对象
+    reactivities.set(obj, proxy)
+    // proxy自己还是直接返回
+    reactivities.set(proxy, proxy)
+
+    return proxy
+  }
+  function effect(handler) {
+    // 先清空
+    usedReactivities = []
+    // 如果这里什么都不干，那就effect、和代理对象无关系
+    // 有关系执行以下handler
+    // handlers.push(handler)
+    // 执行这个handler的时候，会执行get方法
+    // 再收集
+    handler()
+    console.log(usedReactivities)
+    for(let usedReactivity of usedReactivities) {
+      let [obj, prop] = usedReactivity
+      console.log(obj, prop)
+      // effect都会取值在这个时候收集对象的所有属性以对象加对象的属性做key值
+      if(!handlers.has(obj)) {
+        handlers.set(obj, new Map())
+      }
+      if(!handlers.get(obj).has(prop)) {
+        handlers.get(obj).set(prop, [])
+      }
+      handlers.get(obj).get(prop).push(handler)
+    }
+  }
+  // let dummy;
+  // let proxy = reactive(object)
+  // console.log(dummy)
+  // // 箭头函数写if表达式和或表达式都会有问题
+  // effect(() => dummy = proxy.a)
+  // // 但是还是不会与proxy.a产生关系，所以我们想的是如果能在set里面执行handler就可以了
+  // console.log('dummy', dummy)
+  // proxy.a = 2;
+  // console.log(dummy)
+  // 关联上了dummy就会只要代理对象发生改变执行effect
+  // 但是有一个问题，就是检查的对象不准确，两个dummy的时候设置其中一个值会执行全部handler。但是最想的就是
+  // 只执行某个值改变执行对应的handler
+  // 解决这个问题就是做个映射做个依赖收集，使用map做映射升级，key使用代理的对象，value对应这个对象的handler
+
+
+  // 2. 多个对象的变化
+  // let v12, v1, v2;
+  // let p1 = reactive({a: 1})
+  // let p2 = reactive({a: 2})
+
+  // effect(() => v12 = p1.a + p2.a)
+  // effect(() => v1 = p1.a)
+  // effect(() => v2 = p1.a)
+
+  // 3. 导致监听失效案例
+  // let v;
+  // let p1 = reactive({a: 1})
+  // let p2 = reactive({a: 2})
+
+  // effect(() => v = p1.a)
+  // console.log(v);
+  // b = true
+  // p1.a = 10
+  // 即使换了对象也不会有问题
+  // p1.a = {aa: 9}
+  // console.log('sasa', v)
+
+  // 遇到多层嵌套的怎么办
+  let p = reactive(reactive({ r: 6, g: 88, b: 44 }))
+  
+  // let p = reactive({r: 6, g: 88, b: 44})
+  // effect(() => {
+  //   document.querySelector("#r").value = p.r;
+  // })
+  // effect(() => {
+  //   document.querySelector("#g").value = p.g;
+  // })
+  // effect(() => {
+  //   document.querySelector("#b").value = p.b;
+  // })
+  // document.querySelector("#r").addEventListener('input', (event) => {
+  //   p.r = event.target.value
+  // })
+  // document.querySelector("#g").addEventListener('input', (event) => {
+  //   p.g = event.target.value
+  // })
+  // document.querySelector("#b").addEventListener('input', (event) => {
+  //     p.b = event.target.value
+  // })
+  // effect(() => {
+  //   document.querySelector("#color").innerText = `[${p.r}, ${p.g}, ${p.b}]`
+  //   document.querySelector('#color').style.backgroundColor = `rgb(${p.r}, ${p.g},${p.b})`
+  //   document.querySelector('#color').style.color = `rgb(${255-p.r}, ${255 - p.g},${255 - p.b})`
+  // })
+</script>

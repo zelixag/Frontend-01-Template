@@ -80,7 +80,7 @@ function search(p, s) {
   let tar = 0; // 主串
   let pos = 0; // 匹配串
   while (tar < s.length) {
-    if (s[tar] === p[pos]) {
+    if (s[tar] === p[pos] || p[pos] === '?') {
       tar++;
       pos++;
     } else if (pos != 0) {
