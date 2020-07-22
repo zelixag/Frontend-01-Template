@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>carousel component</title>
+  <style>
+    #container {
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .carousel {
+      width: 500px;
+      height: 300px;
+      white-space: nowrap;
+      /* zoom: 0.3; */
+      outline: solid 1px blue;
+      overflow: hidden;
+    }
+    .carousel>img{
+      width: 500px;
+      height: 300px;
+      display: inline-block;
+      transition: ease 1s;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+
+  </div>
+  <script>
+    let data = [
+      'https://static001.geekbang.org/resource/image/bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg',
+      'https://static001.geekbang.org/resource/image/1b/21/1b809d9a2bdf3ecc481322d7c9223c21.jpg',
+      'https://static001.geekbang.org/resource/image/b6/4f/b6d65b2f12646a9fd6b8cb2b020d754f.jpg',
+      'https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg',
+    ];
+    // 先写架构代码
+    // 再写输出结果
+    class Carousel {
+      constructor(data) {
+        this.data = data
+      }
+      render() {
+        this.root = document.createElement("div");
+        this.root.classList.add('carousel')
+
+        for(let d of data) {
+          let element = document.createElement("img")
+          element.src = d;
+          element.addEventListener('dragstart', event => event.preventDefault())
+          this.root.appendChild(element)
+        }
+        // 需要一个定位坐标
+        let position = 0;
+
+        // 写循环轮播也需要settimeout递归
+        let nextPic = () => {
+          const length = this.data.length
+
+          const nextPosition =  (position + 1) % length
+          const current = this.root.childNodes[position];
+          const next = this.root.childNodes[nextPosition]
+          // 只能改变视觉，不能改变DOM结构，所以最好不要有dom操作。改变dom语义就发生变化，这不是我们可以预期的地方.
+          // 只能改变他的css
+          current.style.transition = "ease 0s" 
+          next.style.transition = "ease 0s" 
+          
+          current.style.transform = `translateX(${- 100 * position}%)`
+          next.style.transform = `translateX(${100 - 100 * nextPosition}%)`
+          // 为什么是16毫秒 因为16毫秒就是一帧 。动画时间大于轮播时间会出错。transtion渲染是有间隔的 transtion 16毫秒最好 两段动画需要16毫秒隔间开
+          setTimeout(function() {
+            // means use css rule 使用css的功能
+            current.style.transition = "" 
+            next.style.transition = "" 
+
+            current.style.transform = `translateX(${-100-100 * position}%)`
+            next.style.transform = `translateX(${-100 * nextPosition}%)`
+
+            // 这样position不会超过length 取余运算
+            position = nextPosition
+          }, 16)
+
+          
+
+
+          // 使用一层会出现问题，第一帧是上面的动画代码生效的的方法第二个才属于下面的动画代码
+          // 浏览器一直是连续的dom操作会合并
+          // requestAnimationFrame(function() {
+          //   requestAnimationFrame(function() {
+          //     current.style.transition = "ease 0.5s"
+          //     next.style.transition = "ease 0.5s"
+
+          //     current.style.transform = `translateX(${-100 - 100 * position}%)`
+          //     next.style.transform = `translateX(${-100 * nextPosition}%)`
+
+          //     // 这样position不会超过length 取余运算
+          //     position = nextPosition
+          //   })
+          // })
+
+          setTimeout(nextPic, 3000)
+        }
+        this.root.addEventListener("mousedown", event => {
+          let startX = event.clientX, startY = event.clientY;
+          const length = this.data.length
+          const nextPosition = (position + 1) % length
+          const lastPosition = (position - 1 + length) % length
+          
+          const current = this.root.childNodes[position];
+          const last = this.root.childNodes[lastPosition];
+          const next = this.root.childNodes[nextPosition]
+
+          current.style.transition = "ease 0s"
+          last.style.transition = "ease 0s"
+          next.style.transition = "ease 0s" 
+
+          current.style.transform = `translateX(${500 - 500 * position}px)`
+          last.style.transform = `translateX(${-500 - 500 * lastPosition}px)`
+          next.style.transform = `translateX(${500 - 500 * nextPosition}px)`
+
+          let move = event => {
+            let current = this.root.childNodes[position];
+            
+            current.style.transform = `translateX(${event.clientX - startX - 500 * position}px)`
+            last.style.transform = `translateX(${event.clientX - startX -500 - 500 * lastPosition}px)`
+            next.style.transform = `translateX(${ event.clientX - startX + 500 - 500 * nextPosition}px)`
+          };
+          let up = event => {
+            let offset = 0
+            // 拖过一半就应该换下一张图
+            if(event.clientX - startX > 250) {
+              offset = 1;
+            } else if(event.clientX - startX < -250) {
+              offset = -1
+            }
+
+            // open use css rule
+            current.style.transition = ""
+            last.style.transition = ""
+            next.style.transition = "" 
+
+            current.style.transform = `translateX(${offset * 500 - 500 * position}px)`
+            last.style.transform = `translateX(${offset * 500 - 500 - 500 * lastPosition}px)`
+            next.style.transform = `translateX(${offset * 500 + 500 - 500 * nextPosition}px)`
+            
+            position +=  (position - offset + length) % length;
+
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+          };
+          document.addEventListener("mousemove", move);
+          document.addEventListener("mouseup", up);
+        })
+        // setTimeout(nextPic, 3000)
+      }
+    }
+
+    let carousel = new Carousel(data);
+    carousel.render()
+
+    document.getElementById("container").appendChild(carousel.root)
+  </script>
+</body>
+</html>

@@ -2,6 +2,7 @@
 
 // 框架代码 -------start-----
 let Vue = {}
+import Carousel from './carousel.vue'
 Vue.createElement = function createElement(Cls, attribute, ...children) {
     let o = typeof Cls === 'string' ? new Wrapper(Cls) : new Cls({ timer: 90 });
     

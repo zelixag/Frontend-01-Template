@@ -3,7 +3,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.js/,
         use: {
           loader: "babel-loader",
           options: {
@@ -14,6 +14,12 @@ module.exports = {
           },
         },
       },
+      {
+        test: /\.vue/,
+        use: {
+          loader: require.resolve("./myloader.js")
+        }
+      }
     ],
   },
   mode: 'development',
