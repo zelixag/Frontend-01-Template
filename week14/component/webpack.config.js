@@ -9,7 +9,7 @@ module.exports = {
           options: {
             presets: ["@babel/preset-env"],
             plugins: [["@babel/plugin-transform-react-jsx", {
-              pragma: 'Vue.createElement'
+              pragma: 'createElement'
             }]],
           },
         },

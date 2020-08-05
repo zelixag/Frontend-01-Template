@@ -1,24 +1,9 @@
-
-
 // 框架代码 -------start-----
-let Vue = {}
-import Carousel from './carousel.vue'
-Vue.createElement = function createElement(Cls, attribute, ...children) {
-    let o = typeof Cls === 'string' ? new Wrapper(Cls) : new Cls({ timer: 90 });
-    
-    for (let name in attribute) {
-      o.setAttribute(name, attribute[name])
-    }
-
-    for (const child of children) {
-      if(typeof child === 'string')
-        child = new Text(child); 
-      o.appendChild(child);
-    }
-    return o
-  }
-// 框架代码 -------end----- 
-
+import { createElement, Text, Wrapper } from "./createElement";
+// import { CarouselSFC } from "./carouselSFC.vue";
+import { Carousel } from "./Carousel";
+import {Panel} from "./Panel"
+// 框架代码 -------end-----
 
 //  没有属性的时候传的不是一个{} 而是 null
 // class Child {
@@ -38,74 +23,46 @@ Vue.createElement = function createElement(Cls, attribute, ...children) {
 //     parent.appendChild(this.root);
 //   }
 // }
-class Text {
-  constructor(text) {
-    this.children = [];
-    this.root = document.createTextNode(text);
-  }
-  mountTo(parent) {
-    parent.appendChild(this.root);
-  }
-}
-class Wrapper {
-  constructor(type) {
-    this.children = [];
-    this.root = document.createElement(type);
-  }
-  set class(v) {
-    // property
-    console.log("Parent::class", v);
-  }
-  setAttribute(name, value) {
-    // Attribute
-    this.root.setAttribute(name, value);
-  }
-  appendChild(child) {
-    this.children.push(child);
-  }
-  mountTo(parent) {
-    parent.appendChild(this.root);
 
-    for (const child of this.children) {
-      child.mountTo(this.root);
-    }
-  }
-}
-class MyComponent {
-  constructor(config) {
-    this.children = [];
-  }
-  set class(v) {
-    // property
-    console.log("Parent::class", v);
-  }
-  setAttribute(name, value) {
-    // Attribute
-    this.root.setAttribute(name, value);
-  }
-  appendChild(child) {
-    // this.children.push(child)
-    this.children.push(child);
-    // this.slot.appendChild(child)
-  }
-  render() {
-    return (
-      <article>
-        <header>I'm a header</header>
-        {this.slot}
-        <footer>I'm a header</footer>
-      </article>
-    );
-  }
-  mountTo(parent) {
-    this.slot = <div></div>;
-    for (const child of this.children) {
-      this.slot.appendChild(child)
-    }
-    // parent.appendChild(this.root);
-    this.render().mountTo(parent);
-  }
-};
+
+// 将这个进行改造
+// class MyComponent {
+//   constructor(config) {
+//     this.children = [];
+//   }
+//   set class(v) {
+//     // property
+//     console.log("Parent::class", v);
+//   }
+//   setAttribute(name, value) {
+//     // Attribute
+//     this.root.setAttribute(name, value);
+//   }
+//   appendChild(child) {
+//     // this.children.push(child)
+//     this.children.push(child);
+//     // this.slot.appendChild(child)
+//   }
+//   render() {
+//     return (
+//       <article>
+//         <header>I'm a header</header>
+//         {this.slot}
+//         <footer>I'm a header</footer>
+//       </article>
+//     );
+//   }
+//   mountTo(parent) {
+//     this.slot = <div></div>;
+//     for (const child of this.children) {
+//       this.slot.appendChild(child)
+//     }
+//     // parent.appendChild(this.root);
+//     this.render().mountTo(parent);
+//   }
+// };
+
+
 // 小写认为是字符串，大写是类
 // let component = <Div id="cls" class="b" style="width: 100px;height:100px;background: #e2f">
 //   <div></div>
@@ -113,8 +70,32 @@ class MyComponent {
 //   <p></p>
 //   <Div></Div>
 // </Div>
-// let component = <div>dsajkdask</div>
-let component =  <MyComponent>
-  <div>text text text</div>
-</MyComponent>
-component.mountTo(document.body);
+// let component = <div>dsajkdask</div>*/
+// let component =  <MyComponent>
+//   <div>text text text</div>
+// </MyComponent>
+// component.mountTo(document.body);
+console.log(createElement);
+window.createElement = createElement;
+let panel = (
+  <TabPanel>
+    <span title="title1">This is content1</span>
+    <span title="title2">This is content2</span>
+    <span title="title3">This is content3</span>
+    <span title="title4">This is content4</span>
+    <span title="title5">This is content5</span>
+  </TabPanel>
+);
+panel.mountTo(document.body);
+// let carousel = (
+//   <Carousel
+//     data={[
+//       "https://static001.geekbang.org/resource/image/bb/21/bb38fb7c1073eaee1755f81131f11d21.jpg",
+//       "https://static001.geekbang.org/resource/image/1b/21/1b809d9a2bdf3ecc481322d7c9223c21.jpg",
+//       "https://static001.geekbang.org/resource/image/b6/4f/b6d65b2f12646a9fd6b8cb2b020d754f.jpg",
+//       "https://static001.geekbang.org/resource/image/73/e4/730ea9c393def7975deceb48b3eb6fe4.jpg",
+//     ]}
+//   />
+// );
+
+// carousel.mountTo(document.body);
