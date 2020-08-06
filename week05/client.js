@@ -58,7 +58,6 @@ ${this.bodyText}`;
       }
       connection.on("data", (data) => {
         parse.receive(data.toString());
-        debugger;
         if (parse.isFinished) {
           resolve(parse.response);
         }

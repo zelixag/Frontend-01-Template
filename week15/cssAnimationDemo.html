@@ -1,0 +1,22 @@
+<style> 
+:root{ 
+  --s: 100px
+}
+#el {
+  width: var(--s);
+  height: var(--s);
+  background: skyblue;
+}
+</style>
+<div id="el"></div>
+<script>
+  let el = document.getElementById('#el')
+  el.style.transition = "ease 5s"
+  function start() {
+    el.style.transform = "translate(300px, 300px)"
+  }
+  function stop() {
+    el.style.transition = "none"
+    el.style.transform = getComputedStyle(el).transform
+  }
+</script>

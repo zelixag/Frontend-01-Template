@@ -1,10 +1,10 @@
 var parser = require("./parser")
-debugger
 module.exports = function(source, map) {
-  debugger
-  console.log(source)
-  debugger
-  console.log(parser.parseHTML(source))
+  let tree = parser.parseHTML(source);
+  console.log(
+    "tree.children[1].children[0].content",
+    tree.children[1].children[0].content
+  );
   console.log('my loader is running!!!!!\n', this.resourcePath)
   return ""
 }
