@@ -28,6 +28,9 @@ export class Text {
     this.children = [];
     this.root = document.createTextNode(text);
   }
+  setAttribute(name, value) {
+    this[name] = value;
+  }
   mountTo(parent) {
     parent.appendChild(this.root);
   }
@@ -43,12 +46,25 @@ export class Wrapper {
   }
   setAttribute(name, value) {
     this.root.setAttribute(name, value);
+    if(name.match(/^on([\s\S]+)$/)){
+      let eventName = RegExp.$1.replace(/^[\s\S]/, (c) => c.toLowerCase());
+      this.addEventListener(eventName, value)
+    }
+  }
+  getAttribute(name) {
+    return this.root.getAttribute(name)
   }
   appendChild(child) {
     this.children.push(child);
   }
   get style() {
     return this.root.style;
+  }
+  get classList() {
+    return this.root.classList
+  }
+  set innerText(text) {
+    return this.root.innerText = text
   }
   addEventListener() {
     this.root.addEventListener(...arguments);

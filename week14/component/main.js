@@ -3,6 +3,7 @@ import { createElement, Text, Wrapper } from "./createElement";
 // import { CarouselSFC } from "./carouselSFC.vue";
 import { Carousel } from "./Carousel";
 import {Panel} from "./Panel"
+import {TabPanel} from "./TabPanel"
 // 框架代码 -------end-----
 
 //  没有属性的时候传的不是一个{} 而是 null
