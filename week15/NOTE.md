@@ -48,3 +48,9 @@ timeLine：
 // 有时候故意为了触发GPU会使用translate3D， transform不会触发重排 如果做动画每一帧触发一次重排浏览器肯定会卡
 
 一个好的timiingFunction是time入 program出
+
+### timeline 处理
+
+### 结束的animation做一个管理
+
+想什么时候停就什么时候停 css几乎做不到
