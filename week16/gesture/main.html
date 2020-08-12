@@ -1,0 +1,22 @@
+<body>
+  <style>
+    #box{
+      font-size: 5rem;
+    }
+  </style>
+  <div id="box"></div>
+</body>
+<script src="./gesture.js">
+
+</script>
+<script>
+// 静止系统默认事件
+  window.addEventListener('contextmenu', event => event.preventDefault())
+  document.addEventListener('selectstart', event => event.preventDefault())
+  document.addEventListener('touchmove', event => event.preventDefault(), {passive: false})
+  enableGesture(document.body);
+
+  document.body.addEventListener('tap', () => {
+    console.log('tap!!!!!!')
+  })
+</script>

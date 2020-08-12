@@ -42,7 +42,7 @@
   let tl = new Timeline()
   let tl1 = new Timeline()
   // 有时候故意为了触发GPU会使用translate3D， transform不会触发重排
-  tl.add(new Animation(el.style, "transform", v => `translateX(${v}px)`, 0, 200, 5000, 0, ease))
+  tl.add(new Animation(el.style, "transform", v => `translateX(${v}px)`, 0, 200, 5000, 100, ease))
   // tl.add(new Animation(el2.style, "transform", v => `translateX(${v}px)`, 0, 200, 5000, 0))
   tl.start()
   document.getElementById('el').addEventListener('click', () => {

@@ -7,6 +7,7 @@ export class Timeline {
     this.requestId = null;
     this.state = "inited";
     this.tick = () => {
+      // tick 当前时间减去开始的时间
       let t = Date.now() - this.startTime;
       let animations = this.animations.filter(
         (animation) => !animation.finished
@@ -24,12 +25,13 @@ export class Timeline {
           timingFunction,
         } = animation;
 
-        // 入参 t-delay
+        // 入参 t-delay 现在的时间 减去延迟
         let progression = timingFunction((t - delay - addTime) / duration);
         if (t > duration + delay + addTime) {
           progression = 1;
           animation.finished = true;
         }
+        // 给的动画发生变化 有可能是背景有可能盒子移动 style发生变化
         let value = animation.valueFromProgression(progression);
 
         object[property] = template(value);
@@ -132,7 +134,7 @@ export class ColorAnimation {
     };
   }
 }
-
+// delay 延迟动画
 /*
 js 动画都是一些属性的变化 起点到终点
 let animation = new Animation(object, property, start, end, duration, timingFunction, delay)
