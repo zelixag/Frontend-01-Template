@@ -1,6 +1,6 @@
 <body>
   <style>
-    #box{
+    #box {
       font-size: 5rem;
     }
   </style>
@@ -10,10 +10,10 @@
 
 </script>
 <script>
-// 静止系统默认事件
+  // 静止系统默认事件
   window.addEventListener('contextmenu', event => event.preventDefault())
   document.addEventListener('selectstart', event => event.preventDefault())
-  document.addEventListener('touchmove', event => event.preventDefault(), {passive: false})
+  document.addEventListener('touchmove', event => event.preventDefault(), { passive: false })
   enableGesture(document.body);
 
   document.body.addEventListener('tap', () => {
